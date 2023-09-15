@@ -1,1 +1,1 @@
-# chrome-lite-start-screen
+# chrome-start-screen-lite
