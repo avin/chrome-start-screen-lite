@@ -1,0 +1,38 @@
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+.dialog {
+  border-radius: 8px;
+  background-color: white;
+  width: 512px;
+}
+
+.title {
+  padding: 16px 20px;
+  font-size: 15px;
+  color: #202124;
+  user-select: none;
+}
+
+.body {
+  padding: 0 20px;
+}
+
+.buttons {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+  & > * + * {
+    margin-left: 8px;
+  }
+}
