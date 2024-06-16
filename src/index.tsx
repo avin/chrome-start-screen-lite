@@ -5,9 +5,7 @@ import App from './components/App/App';
 import { defaultBookmarks } from './constants/defaultBookmarks';
 import { Bookmark } from './types';
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.title = chrome.i18n.getMessage('newTabTitle');
-});
+document.title = chrome.i18n.getMessage('newTabTitle');
 
 const root = document.getElementById('root');
 
