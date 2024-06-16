@@ -1,11 +1,9 @@
-import cn from 'clsx';
 import mitt from 'mitt';
 import {
   Component,
   For,
   JSX,
   Show,
-  createEffect,
   createSignal,
   onCleanup,
   onMount,

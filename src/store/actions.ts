@@ -12,8 +12,6 @@ export const initActions = ({
   setState: SetStoreFunction<StoreContextState>;
   selectors: ReturnType<typeof initSelectors>;
 }) => {
-  // Add more here
-
   const updateBookmarkPosition = (
     bookmarkId: string,
     newPosition: Position,
