@@ -17,7 +17,6 @@ const root = document.getElementById('root');
         resolve(defaultBookmarks);
       } else {
         try {
-          console.log('~', data.bookmarks);
           const bookmarks = JSON.parse(data.bookmarks);
           return resolve(bookmarks);
         } catch (e) {
