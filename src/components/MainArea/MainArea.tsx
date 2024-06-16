@@ -18,7 +18,7 @@ const MainArea: Component = () => {
       onContextMenu={(e) => {
         openContextMenu(e, [
           {
-            title: 'Добавить ярлык',
+            title: chrome.i18n.getMessage("addShortcut"),
             onClick: () => {
               setNewBookmarkPosition(
                 getBookmarkPositionByCoordinates(

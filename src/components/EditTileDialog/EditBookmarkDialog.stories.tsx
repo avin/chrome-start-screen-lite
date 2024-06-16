@@ -11,7 +11,7 @@ type Story = StoryObj<typeof EditBookmarkDialog>;
 export const Default: Story = {
   render: () => (
     <EditBookmarkDialog
-      title="Добавить ярлык"
+      title="Add shortcut"
       onClose={() => {}}
       onSubmit={() => {}}
       initialValues={{

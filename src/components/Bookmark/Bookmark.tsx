@@ -132,13 +132,13 @@ const Bookmark: Component<{
         onContextMenu={(e) => {
           openContextMenu(e, [
             {
-              title: 'Редактировать',
+              title: chrome.i18n.getMessage("edit"),
               onClick: () => {
                 setEditingBookmark(bookmark().id);
               },
             },
             {
-              title: 'Удалить',
+              title: chrome.i18n.getMessage("delete"),
               onClick: () => {
                 removeBookmark(bookmark().id);
               },

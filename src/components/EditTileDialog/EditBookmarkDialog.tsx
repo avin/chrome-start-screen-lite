@@ -33,13 +33,13 @@ const EditBookmarkDialog: Component<{
       title={props.title}
       buttons={[
         {
-          label: 'Отмена',
+          label: chrome.i18n.getMessage('cancel'),
           onClick: () => {
             props.onClose();
           },
         },
         {
-          label: 'Готово',
+          label: chrome.i18n.getMessage('done'),
           onClick: () => {
             handleSubmit();
           },
@@ -48,7 +48,7 @@ const EditBookmarkDialog: Component<{
       ]}
     >
       <form>
-        <InputContainer label="Название">
+        <InputContainer label={chrome.i18n.getMessage('title')}>
           <Input
             name="title"
             value={formValues().title}

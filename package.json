@@ -4,11 +4,10 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "dev:crx": "cross-env CRX=1 vite",
-    "build": "vite build",
-    "serve": "vite preview",
+    "generate-locales": "node generate-locales.js",
+    "dev": "npm run generate-locales && vite",
+    "dev:crx": "cross-env CRX=1 npm run dev",
+    "build": "npm run generate-locales && vite build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest"

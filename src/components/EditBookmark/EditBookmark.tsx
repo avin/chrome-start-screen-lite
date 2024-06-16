@@ -24,7 +24,7 @@ const EditBookmark: Component = () => {
     <Show when={state.editingBookmark}>
       <EditBookmarkDialog
         title={
-          state.editingBookmark === 'new' ? 'Добавить ярлык' : 'Изменить ярлык'
+          state.editingBookmark === 'new' ? chrome.i18n.getMessage("addShortcut") : chrome.i18n.getMessage("editShortcut")
         }
         onClose={() => {
           setEditingBookmark(null);

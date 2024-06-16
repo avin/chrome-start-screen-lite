@@ -5,7 +5,18 @@ import App from './components/App/App';
 import { defaultBookmarks } from './constants/defaultBookmarks';
 import { Bookmark } from './types';
 
+document.addEventListener('DOMContentLoaded', function () {
+  document.title = chrome.i18n.getMessage('newTabTitle');
+});
+
 const root = document.getElementById('root');
+
+window.debug_setBookmarks = (bookmarks: string) => {
+  chrome.storage.sync.set({ bookmarks: bookmarks });
+};
+window.debug_dumpBookmarks = () => {
+  chrome.storage.sync.get(['bookmarks'], (data) => console.log(data.bookmarks));
+};
 
 (async () => {
   const initialBookmarks = await new Promise<Bookmark[]>((resolve, reject) => {
