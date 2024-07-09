@@ -4,12 +4,17 @@ import Button from '../Button/Button';
 
 const Dialog: Component<{
   title: JSX.Element;
-  buttons: { label: string; onClick: () => void; disabled?: boolean }[];
+  buttons: {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    submit?: boolean;
+  }[];
   children: JSX.Element;
 }> = (props) => {
   return (
     <div class={styles.overlay}>
-      <div class={styles.dialog}>
+      <form class={styles.dialog}>
         <div class={styles.title}>{props.title}</div>
 
         <div class={styles.body}>{props.children}</div>
@@ -17,13 +22,17 @@ const Dialog: Component<{
         <div class={styles.buttons}>
           <For each={props.buttons}>
             {(button, i) => (
-              <Button disabled={button.disabled} onClick={button.onClick}>
+              <Button
+                disabled={button.disabled}
+                onClick={button.onClick}
+                type={button.submit ? 'submit' : 'button'}
+              >
                 {button.label}
               </Button>
             )}
           </For>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

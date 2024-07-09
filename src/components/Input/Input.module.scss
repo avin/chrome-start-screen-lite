@@ -10,4 +10,8 @@
   &:focus {
     outline: 1px solid #1a73e8;
   }
+
+  &::placeholder {
+    opacity: 0.75;
+  }
 }

@@ -40,6 +40,7 @@ const EditBookmarkDialog: Component<{
         },
         {
           label: chrome.i18n.getMessage('done'),
+          submit: true,
           onClick: () => {
             handleSubmit();
           },
@@ -47,29 +48,26 @@ const EditBookmarkDialog: Component<{
         },
       ]}
     >
-      <form>
-        <InputContainer label={chrome.i18n.getMessage('title')}>
-          <Input
-            name="title"
-            value={formValues().title}
-            onInput={(e) => {
-              setFormValues((f) => ({ ...f, title: e.target.value }));
-            }}
-          />
-        </InputContainer>
+      <InputContainer label={chrome.i18n.getMessage('title')}>
+        <Input
+          name="title"
+          value={formValues().title}
+          onInput={(e) => {
+            setFormValues((f) => ({ ...f, title: e.target.value }));
+          }}
+        />
+      </InputContainer>
 
-        <InputContainer label="URL">
-          <Input
-            name="url"
-            value={formValues().url}
-            onInput={(e) => {
-              setFormValues((f) => ({ ...f, url: e.target.value }));
-            }}
-          />
-        </InputContainer>
-
-        <input type="submit" hidden />
-      </form>
+      <InputContainer label="URL">
+        <Input
+          name="url"
+          value={formValues().url}
+          placeholder="https://"
+          onInput={(e) => {
+            setFormValues((f) => ({ ...f, url: e.target.value }));
+          }}
+        />
+      </InputContainer>
     </Dialog>
   );
 };
