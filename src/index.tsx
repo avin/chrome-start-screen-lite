@@ -17,22 +17,45 @@ window.debug_dumpBookmarks = () => {
 };
 
 (async () => {
-  const initialBookmarks = await new Promise<Bookmark[]>((resolve, reject) => {
-    if (!chrome.storage) {
+  const initialBookmarks = await new Promise<Bookmark[]>(async (resolve) => {
+    if (!chrome.storage || !chrome.storage.sync) {
       return resolve(defaultBookmarks);
     }
-    chrome.storage.sync.get(['bookmarks'], function (data) {
-      if (chrome.runtime.lastError) {
-        resolve(defaultBookmarks);
-      } else {
-        try {
-          const bookmarks = JSON.parse(data.bookmarks);
-          return resolve(bookmarks);
-        } catch (e) {
-          console.warn(e);
-          return resolve(defaultBookmarks);
-        }
+
+    chrome.storage.sync.get(['bookmarks'], async function (data) {
+      if (chrome.runtime && chrome.runtime.lastError) {
+        return resolve(defaultBookmarks);
       }
+
+      let bookmarks: Bookmark[] = defaultBookmarks;
+      try {
+        if (data.bookmarks) {
+          bookmarks = JSON.parse(data.bookmarks);
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to parse bookmarks from sync, using defaults', e);
+        bookmarks = defaultBookmarks;
+      }
+
+      // Merge icons from local storage, if available
+      if (chrome.storage.local && bookmarks.length > 0) {
+        const keys = bookmarks.map((b) => `icon:${b.id}`);
+        chrome.storage.local.get(keys, (icons) => {
+          if (chrome.runtime && chrome.runtime.lastError) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to read icons from local:', chrome.runtime.lastError.message);
+          }
+          const withIcons = bookmarks.map((b) => {
+            const iconDataUrl = icons[`icon:${b.id}`] as string | undefined;
+            return iconDataUrl ? { ...b, iconDataUrl } : b;
+          });
+          resolve(withIcons);
+        });
+        return;
+      }
+
+      resolve(bookmarks);
     });
   });
 
