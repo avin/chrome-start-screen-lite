@@ -13,6 +13,7 @@ import { Position } from '../../types';
 import {
   getBookmarkCoordinatesByPosition,
   getBookmarkPositionAfterDrag,
+  TILE_SIZE,
 } from '../../utils/position';
 import { openContextMenu } from '../ContextMenu/ContextMenu';
 
@@ -45,6 +46,7 @@ const Bookmark: Component<{
   const [dragOffset, setDragOffset] = createSignal<Position>([0, 0]);
 
   let startMousePosition = [0, 0];
+  let startScale = 1;
 
   const faviconImgSrc = createMemo(() => {
     return faviconURL(bookmark().url);
@@ -62,7 +64,7 @@ const Bookmark: Component<{
   };
 
   const afterDragPosition = (): Position => {
-    return getBookmarkPositionAfterDrag(bookmark().position, dragOffset());
+    return getBookmarkPositionAfterDrag(bookmark().position, dragOffset(), startScale);
   };
 
   const dragToStyle = () => {
@@ -83,14 +85,29 @@ const Bookmark: Component<{
       if (!isDragging()) {
         return;
       }
-      setDragOffset([
-        startMousePosition[0] - e.clientX,
-        startMousePosition[1] - e.clientY,
-      ]);
+      
+      const container = document.querySelector(`.${styles.tile}`)?.parentElement?.parentElement;
+      if (container) {
+        const transform = window.getComputedStyle(container.querySelector(`.${styles.tile}`)?.parentElement!).transform;
+        const matrixMatch = transform.match(/matrix\(([^,]+),/);
+        const currentScale = matrixMatch ? parseFloat(matrixMatch[1]) : 1;
+        
+        setDragOffset([
+          (startMousePosition[0] - e.clientX) / currentScale,
+          (startMousePosition[1] - e.clientY) / currentScale,
+        ]);
+      } else {
+        setDragOffset([
+          startMousePosition[0] - e.clientX,
+          startMousePosition[1] - e.clientY,
+        ]);
+      }
+      
       if (Math.abs(dragOffset()[0]) + Math.abs(dragOffset()[1]) > 10) {
         setIsVisuallyDragging(true);
       }
     };
+    
     const handleMouseUp = (e: MouseEvent) => {
       if (!isDragging()) {
         return;
@@ -100,11 +117,11 @@ const Bookmark: Component<{
       setIsDragging(false);
       setDragOffset([0, 0]);
 
-      // Задержка для того чтоб корректно отработало условие в onClick
       setTimeout(() => {
         setIsVisuallyDragging(false);
       });
     };
+    
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     onCleanup(() => {
@@ -126,6 +143,12 @@ const Bookmark: Component<{
           }
         }}
         onMouseDown={(e) => {
+          const container = (e.currentTarget as HTMLElement).parentElement;
+          if (container) {
+            const transform = window.getComputedStyle(container).transform;
+            const matrixMatch = transform.match(/matrix\(([^,]+),/);
+            startScale = matrixMatch ? parseFloat(matrixMatch[1]) : 1;
+          }
           startMousePosition = [e.clientX, e.clientY];
           setIsDragging(true);
         }}

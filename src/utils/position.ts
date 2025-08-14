@@ -27,6 +27,7 @@ export const getBookmarkPositionByCoordinates = (
 export const getBookmarkPositionAfterDrag = (
   startPosition: Position,
   dragOffset: Position,
+  scale: number = 1,
 ): Position => {
   const startCoordinates = getBookmarkCoordinatesByPosition(startPosition);
   const afterDragCoordinates = [
