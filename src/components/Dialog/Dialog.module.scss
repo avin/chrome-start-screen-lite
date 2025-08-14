@@ -13,14 +13,14 @@
 
 .dialog {
   border-radius: 8px;
-  background-color: white;
+  background-color: var(--dialog-bg);
   width: 512px;
 }
 
 .title {
   padding: 16px 20px;
   font-size: 15px;
-  color: #202124;
+  color: var(--text-color);
   user-select: none;
 }
 

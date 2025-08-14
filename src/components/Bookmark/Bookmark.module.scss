@@ -15,11 +15,11 @@ $size: 112px;
   // transition: background-color .08s linear;
 
   &.dragging {
-    background-color: rgba(32, 33, 36, 0.1);
+    background-color: var(--tile-hover-bg);
     // backdrop-filter: blur(1px);
   }
   &:hover:not(.dragging) {
-    background-color: rgba(32, 33, 36, 0.1);
+    background-color: var(--tile-hover-bg);
   }
 }
 
@@ -52,7 +52,7 @@ $size: 112px;
   height: 48px;
   margin-top: 16px;
   border-radius: 50%;
-  background-color: rgb(241, 243, 244);
+  background-color: var(--icon-bg);
   pointer-events: none;
 
   img {
@@ -66,7 +66,7 @@ $size: 112px;
   position: absolute;
   width: $size;
   height: $size;
-  border: 1px dashed rgba(32, 33, 36, 0.5);
+  border: 1px dashed var(--tile-drag-border);
   border-radius: 4px;
   pointer-events: none;
 }
