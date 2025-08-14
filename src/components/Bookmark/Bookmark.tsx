@@ -33,7 +33,7 @@ const Bookmark: Component<{
     (newPosition) => updateBookmarkPosition(bookmark().id, newPosition)
   );
 
-  const faviconImgSrc = createMemo(() => getFaviconURL(bookmark().url));
+  const faviconImgSrc = createMemo(() => bookmark().iconDataUrl || getFaviconURL(bookmark().url));
 
   const bookmarkStyle = () => {
     const tileCoordinates = getBookmarkCoordinatesByPosition(

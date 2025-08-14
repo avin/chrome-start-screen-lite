@@ -5,4 +5,5 @@ export interface Bookmark {
   title: string;
   url: string;
   position: Position
+  iconDataUrl?: string;
 }

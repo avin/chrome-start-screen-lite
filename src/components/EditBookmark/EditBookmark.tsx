@@ -15,13 +15,14 @@ const EditBookmark: Component = () => {
     if (isNewBookmark()) return {};
     
     const bookmark = state.bookmarks.find(i => i.id === state.editingBookmark);
-    return bookmark ? { title: bookmark.title, url: bookmark.url } : {};
+    return bookmark ? { title: bookmark.title, url: bookmark.url, iconDataUrl: bookmark.iconDataUrl } : {};
   });
 
-  const handleSubmit = (data: { title: string; url: string }) => {
+  const handleSubmit = (data: { title: string; url: string; iconDataUrl?: string }) => {
     const normalizedData = {
       title: data.title,
-      url: normalizeUrl(data.url)
+      url: normalizeUrl(data.url),
+      iconDataUrl: data.iconDataUrl,
     };
 
     if (isNewBookmark()) {
