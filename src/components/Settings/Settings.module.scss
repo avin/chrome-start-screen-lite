@@ -1,0 +1,70 @@
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+.dialog {
+  border-radius: 8px;
+  background-color: var(--dialog-bg);
+  width: 512px;
+  max-width: 90vw;
+}
+
+.title {
+  padding: 16px 20px;
+  font-size: 15px;
+  color: var(--text-color);
+  user-select: none;
+  border-bottom: 1px solid var(--button-border);
+}
+
+.body {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: var(--text-color);
+}
+
+.sectionDescription {
+  font-size: 13px;
+  color: var(--muted-text-color);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fileInput {
+  display: none;
+}
+
+.footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--button-border);
+  display: flex;
+  justify-content: flex-end;
+}
