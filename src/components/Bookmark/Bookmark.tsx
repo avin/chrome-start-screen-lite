@@ -1,5 +1,5 @@
 import cn from 'clsx';
-import { Component, createMemo, createSignal, onMount } from 'solid-js';
+import { Component, createMemo, createSignal, createEffect } from 'solid-js';
 import styles from './Bookmark.module.scss';
 import { useStore } from '../../store/store';
 import type { Bookmark as BookmarkType } from '../../types';
@@ -24,7 +24,7 @@ const Bookmark: Component<{
 
   const [currentFaviconUrl, setCurrentFaviconUrl] = createSignal<string | undefined>(undefined);
 
-  onMount(() => {
+  createEffect(() => {
     const currentBookmark = bookmark();
     
     if (currentBookmark.iconDataUrl) {
@@ -44,6 +44,8 @@ const Bookmark: Component<{
   });
 
   const handleGoogleFaviconLoad = (e: Event) => {
+    if (bookmark().iconDataUrl) return;
+    
     const img = e.target as HTMLImageElement;
     if (img.naturalWidth > 16 && img.naturalHeight > 16) {
       const googleUrl = getGoogleFaviconUrl(bookmark().url);
