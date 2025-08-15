@@ -1,8 +1,14 @@
 export function getFaviconURL(url: string): string | undefined {
-  if (!chrome.runtime) return undefined;
-  
-  const faviconUrl = new URL(chrome.runtime.getURL('/_favicon/'));
-  faviconUrl.searchParams.set('pageUrl', url);
-  faviconUrl.searchParams.set('size', '32');
-  return faviconUrl.toString();
+  try {
+    const u = new URL(url);
+    const host = u.hostname;
+    // Cross-browser, no permissions needed. Alternatives if desired:
+    // - https://icons.duckduckgo.com/ip3/${host}.ico
+    // - https://icon.horse/icon/${host}
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+      host,
+    )}&sz=32`;
+  } catch {
+    return undefined;
+  }
 }
