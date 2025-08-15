@@ -1,6 +1,64 @@
 @import 'reset';
 
+:root {
+  --bg-color: #ffffff;
+  --text-color: #202124;
+  --muted-text-color: rgb(95, 99, 104);
+
+  --tile-hover-bg: rgba(32, 33, 36, 0.1);
+  --tile-drag-border: rgba(32, 33, 36, 0.5);
+  --icon-bg: rgb(241, 243, 244);
+
+  --menu-bg: #ffffff;
+  --menu-item-hover-bg: rgba(0, 0, 0, 0.05);
+
+  --dialog-bg: #ffffff;
+
+  --input-bg: rgb(241, 243, 244);
+  --input-text: rgb(32, 33, 36);
+  --input-focus-outline: #1a73e8;
+  --input-hover-bg: rgb(232, 234, 237);
+
+  --button-border: rgb(218, 220, 224);
+  --button-text: rgb(26, 115, 232);
+  --button-hover-bg: rgba(66, 133, 244, 0.04);
+  --button-hover-border: rgb(210, 227, 252);
+  --button-disabled-bg: rgb(241, 243, 244);
+  --button-disabled-text: #80868b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #3c3c3c;
+    --text-color: #e8eaed;
+    --muted-text-color: #9aa0a6;
+
+    --tile-hover-bg: #505050;
+    --tile-drag-border: #9aa0a6;
+    --icon-bg: #444746;
+
+    --menu-bg: #1f1f1f;
+    --menu-item-hover-bg: #363635;
+
+    --dialog-bg: #292a2d;
+
+    --input-bg: #444746;
+    --input-text: #e8eaed;
+    --input-focus-outline: #8ab4f8;
+    --input-hover-bg: #515353;
+
+    --button-border: #5f6368;
+    --button-text: #8ab4f8;
+    --button-hover-bg: rgba(138, 180, 248, 0.12);
+    --button-hover-border: rgba(138, 180, 248, 0.24);
+    --button-disabled-bg: #444746;
+    --button-disabled-text: #9aa0a6;
+  }
+}
+
 body {
   font-size: 16px;
   font-family: sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }

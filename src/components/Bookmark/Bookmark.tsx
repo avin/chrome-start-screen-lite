@@ -1,30 +1,12 @@
 import cn from 'clsx';
-import {
-  Component,
-  createEffect,
-  createMemo,
-  createSignal,
-  onCleanup,
-} from 'solid-js';
+import { Component, createMemo } from 'solid-js';
 import styles from './Bookmark.module.scss';
 import { useStore } from '../../store/store';
 import type { Bookmark as BookmarkType } from '../../types';
-import { Position } from '../../types';
-import {
-  getBookmarkCoordinatesByPosition,
-  getBookmarkPositionAfterDrag,
-} from '../../utils/position';
+import { getBookmarkCoordinatesByPosition, TILE_SIZE } from '../../utils/position';
 import { openContextMenu } from '../ContextMenu/ContextMenu';
-
-function faviconURL(u: string): string | undefined {
-  if (!chrome.runtime) {
-    return undefined;
-  }
-  const url = new URL(chrome.runtime.getURL('/_favicon/'));
-  url.searchParams.set('pageUrl', u);
-  url.searchParams.set('size', '32');
-  return url.toString();
-}
+import { useDragging } from '../../hooks/useDragging';
+import { getFaviconURL } from '../../utils/favicon';
 
 const Bookmark: Component<{
   bookmarkId: string;
@@ -40,15 +22,18 @@ const Bookmark: Component<{
     ) as BookmarkType;
   });
 
-  const [isDragging, setIsDragging] = createSignal();
-  const [isVisuallyDragging, setIsVisuallyDragging] = createSignal();
-  const [dragOffset, setDragOffset] = createSignal<Position>([0, 0]);
+  const {
+    isDragging,
+    isVisuallyDragging,
+    dragOffset,
+    afterDragPosition,
+    handleMouseDown
+  } = useDragging(
+    () => bookmark().position,
+    (newPosition) => updateBookmarkPosition(bookmark().id, newPosition)
+  );
 
-  let startMousePosition = [0, 0];
-
-  const faviconImgSrc = createMemo(() => {
-    return faviconURL(bookmark().url);
-  });
+  const faviconImgSrc = createMemo(() => bookmark().iconDataUrl || getFaviconURL(bookmark().url));
 
   const bookmarkStyle = () => {
     const tileCoordinates = getBookmarkCoordinatesByPosition(
@@ -61,14 +46,9 @@ const Bookmark: Component<{
     };
   };
 
-  const afterDragPosition = (): Position => {
-    return getBookmarkPositionAfterDrag(bookmark().position, dragOffset());
-  };
-
   const dragToStyle = () => {
-    if (!isVisuallyDragging()) {
-      return {};
-    }
+    if (!isVisuallyDragging()) return {};
+    
     const coordinates = getBookmarkCoordinatesByPosition(afterDragPosition());
     return {
       display: 'block',
@@ -78,40 +58,26 @@ const Bookmark: Component<{
     };
   };
 
-  createEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging()) {
-        return;
-      }
-      setDragOffset([
-        startMousePosition[0] - e.clientX,
-        startMousePosition[1] - e.clientY,
-      ]);
-      if (Math.abs(dragOffset()[0]) + Math.abs(dragOffset()[1]) > 10) {
-        setIsVisuallyDragging(true);
-      }
-    };
-    const handleMouseUp = (e: MouseEvent) => {
-      if (!isDragging()) {
-        return;
-      }
-      updateBookmarkPosition(bookmark().id, afterDragPosition());
+  const handleContextMenu = (e: MouseEvent) => {
+    openContextMenu(e, [
+      {
+        title: chrome.i18n.getMessage("edit"),
+        onClick: () => setEditingBookmark(bookmark().id),
+      },
+      {
+        title: chrome.i18n.getMessage("delete"),
+        onClick: () => removeBookmark(bookmark().id),
+      },
+    ]);
+    e.stopPropagation();
+    e.preventDefault();
+  };
 
-      setIsDragging(false);
-      setDragOffset([0, 0]);
-
-      // Задержка для того чтоб корректно отработало условие в onClick
-      setTimeout(() => {
-        setIsVisuallyDragging(false);
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    onCleanup(() => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    });
-  });
+  const handleClick = (e: MouseEvent) => {
+    if (isVisuallyDragging()) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <>
@@ -120,37 +86,13 @@ const Bookmark: Component<{
         href={bookmark().url}
         style={bookmarkStyle()}
         draggable={false}
-        onClick={(e) => {
-          if (isVisuallyDragging()) {
-            e.preventDefault();
-          }
-        }}
-        onMouseDown={(e) => {
-          startMousePosition = [e.clientX, e.clientY];
-          setIsDragging(true);
-        }}
-        onContextMenu={(e) => {
-          openContextMenu(e, [
-            {
-              title: chrome.i18n.getMessage("edit"),
-              onClick: () => {
-                setEditingBookmark(bookmark().id);
-              },
-            },
-            {
-              title: chrome.i18n.getMessage("delete"),
-              onClick: () => {
-                removeBookmark(bookmark().id);
-              },
-            },
-          ]);
-          e.stopPropagation();
-          e.preventDefault();
-        }}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
       >
         <div class={styles.iconContainer}>
           {faviconImgSrc() ? (
-            <img src={faviconImgSrc()} alt="?" />
+            <img src={faviconImgSrc()} alt="" />
           ) : (
             <span>?</span>
           )}

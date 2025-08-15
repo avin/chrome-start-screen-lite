@@ -1,6 +1,7 @@
-import { Component, Show } from 'solid-js';
+import { Component, Show, createMemo } from 'solid-js';
 import { useStore } from '../../store/store';
 import EditBookmarkDialog from '../EditTileDialog/EditBookmarkDialog';
+import { normalizeUrl } from '../../utils/url';
 
 const EditBookmark: Component = () => {
   const {
@@ -8,47 +9,44 @@ const EditBookmark: Component = () => {
     actions: { setEditingBookmark, createBookmark, updateBookmark },
   } = useStore();
 
-  const editingBookmarkOptions = () => {
-    const id = state.editingBookmark;
-    const bookmark = state.bookmarks.find((i) => i.id === id);
-    if (bookmark) {
-      return {
-        title: bookmark.title,
-        url: bookmark.url,
-      };
+  const isNewBookmark = createMemo(() => state.editingBookmark === 'new');
+  
+  const editingBookmarkOptions = createMemo(() => {
+    if (isNewBookmark()) return {};
+    
+    const bookmark = state.bookmarks.find(i => i.id === state.editingBookmark);
+    return bookmark ? { title: bookmark.title, url: bookmark.url, iconDataUrl: bookmark.iconDataUrl } : {};
+  });
+
+  const handleSubmit = (data: { title: string; url: string; iconDataUrl?: string }) => {
+    const normalizedData = {
+      title: data.title,
+      url: normalizeUrl(data.url),
+      iconDataUrl: data.iconDataUrl,
+    };
+
+    if (isNewBookmark()) {
+      createBookmark({
+        ...normalizedData,
+        position: state.newBookmarkPosition,
+      });
+    } else {
+      updateBookmark(state.editingBookmark as string, normalizedData);
     }
-    return {};
+
+    setEditingBookmark(null);
   };
 
   return (
     <Show when={state.editingBookmark}>
       <EditBookmarkDialog
         title={
-          state.editingBookmark === 'new' ? chrome.i18n.getMessage("addShortcut") : chrome.i18n.getMessage("editShortcut")
+          isNewBookmark() 
+            ? chrome.i18n.getMessage("addShortcut") 
+            : chrome.i18n.getMessage("editShortcut")
         }
-        onClose={() => {
-          setEditingBookmark(null);
-        }}
-        onSubmit={(data) => {
-          if (!/^https?:\/\//.test(data.url)) {
-            data.url = `https://${data.url}`;
-          }
-
-          if (state.editingBookmark === 'new') {
-            createBookmark({
-              title: data.title,
-              url: data.url,
-              position: state.newBookmarkPosition,
-            });
-          } else {
-            updateBookmark(state.editingBookmark as string, {
-              title: data.title,
-              url: data.url,
-            });
-          }
-
-          setEditingBookmark(null);
-        }}
+        onClose={() => setEditingBookmark(null)}
+        onSubmit={handleSubmit}
         initialValues={editingBookmarkOptions()}
       />
     </Show>

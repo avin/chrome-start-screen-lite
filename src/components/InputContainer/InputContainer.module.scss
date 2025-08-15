@@ -3,7 +3,7 @@
 }
 
 .label {
-  color: rgb(95, 99, 104);
+  color: var(--muted-text-color);
   margin-bottom: 8px;
   font-weight: 500;
   letter-spacing: 0.4px;

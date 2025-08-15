@@ -1,9 +1,9 @@
 .button {
   align-items: center;
-  border: 1px solid rgb(218, 220, 224);
+  border: 1px solid var(--button-border);
   border-radius: 4px;
   box-sizing: border-box;
-  color: rgb(26, 115, 232);
+  color: var(--button-text);
   cursor: pointer;
   display: inline-flex;
   flex-shrink: 0;
@@ -19,14 +19,14 @@
   font-size: 13px;
 
   &:hover {
-    background-color: rgba(66, 133, 244, 0.04);
-    border-color: rgb(210, 227, 252);
+    background-color: var(--button-hover-bg);
+    border-color: var(--button-hover-border);
   }
 
   &:disabled {
-    background-color: rgb(241, 243, 244);
+    background-color: var(--button-disabled-bg);
     border-color: transparent;
-    color: #80868b;
+    color: var(--button-disabled-text);
     cursor: auto;
     pointer-events: none;
   }

@@ -1,11 +1,14 @@
-import { Component, JSX, createSignal } from 'solid-js';
+import { Component, JSX, Show, createSignal } from 'solid-js';
 import Dialog from '../Dialog/Dialog';
 import Input from '../Input/Input';
 import InputContainer from '../InputContainer/InputContainer';
+import Button from '../Button/Button';
+import { resizeImageFileToDataURL } from '../../utils/image';
 
 interface FormData {
   title: string;
   url: string;
+  iconDataUrl?: string;
 }
 
 const EditBookmarkDialog: Component<{
@@ -26,6 +29,28 @@ const EditBookmarkDialog: Component<{
 
   const isFormValid = () => {
     return !!formValues().title && !!formValues().url;
+  };
+
+  const handleIconFileChange: JSX.EventHandler<HTMLInputElement, Event> = async (e) => {
+    const input = e.currentTarget;
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      const dataUrl = await resizeImageFileToDataURL(file, 64, 'image/png');
+      setFormValues((f) => ({ ...f, iconDataUrl: dataUrl }));
+    } catch (err) {
+      // Silently ignore errors; could add toast/logging later
+      console.error(err);
+    } finally {
+      // reset the input so selecting the same file again re-triggers change
+      input.value = '';
+    }
+  };
+
+  let fileInputRef: HTMLInputElement | undefined;
+
+  const openFileDialog = () => {
+    fileInputRef?.click();
   };
 
   return (
@@ -67,6 +92,37 @@ const EditBookmarkDialog: Component<{
             setFormValues((f) => ({ ...f, url: e.target.value }));
           }}
         />
+      </InputContainer>
+
+      <InputContainer label={chrome.i18n.getMessage('icon')}>
+        <div style={{ display: 'flex', 'align-items': 'center', gap: '12px' }}>
+          <Show when={!!formValues().iconDataUrl}>
+
+              <img
+                src={formValues().iconDataUrl}
+                alt="icon preview"
+                width={32}
+                height={32}
+                style={{ display: 'block' }}
+              />
+
+          </Show>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button onClick={openFileDialog}>{chrome.i18n.getMessage('chooseIcon')}</Button>
+            <Show when={formValues().iconDataUrl}>
+              <Button onClick={() => setFormValues((f) => ({ ...f, iconDataUrl: undefined }))}>{chrome.i18n.getMessage('removeIcon')}</Button>
+            </Show>
+          </div>
+
+          <input
+            ref={(el) => (fileInputRef = el)}
+            type="file"
+            accept="image/*"
+            onChange={handleIconFileChange}
+            style={{ display: 'none' }}
+          />
+        </div>
       </InputContainer>
     </Dialog>
   );
