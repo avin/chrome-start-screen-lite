@@ -68,7 +68,12 @@ export const initActions = ({
     newBookmarkOptions: Partial<Bookmark>,
   ) => {
     // Persist icon changes in local storage separately
-    if (typeof newBookmarkOptions.iconDataUrl !== 'undefined' && chrome.storage && chrome.storage.local) {
+    // Detect explicit presence of the field, even if value is undefined
+    const iconFieldPresent = Object.prototype.hasOwnProperty.call(
+      newBookmarkOptions,
+      'iconDataUrl',
+    );
+    if (iconFieldPresent && chrome.storage && chrome.storage.local) {
       const key = `icon:${bookmarkId}`;
       if (newBookmarkOptions.iconDataUrl) {
         chrome.storage.local.set({ [key]: newBookmarkOptions.iconDataUrl }, () => {
