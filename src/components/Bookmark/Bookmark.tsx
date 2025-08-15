@@ -1,5 +1,5 @@
 import cn from 'clsx';
-import { Component, createMemo, createSignal, onMount } from 'solid-js';
+import { Component, createMemo, createSignal, createEffect } from 'solid-js';
 import styles from './Bookmark.module.scss';
 import { useStore } from '../../store/store';
 import type { Bookmark as BookmarkType } from '../../types';
@@ -22,15 +22,20 @@ const Bookmark: Component<{
     ) as BookmarkType;
   });
 
-  const [faviconUrl, setFaviconUrl] = createSignal<string | undefined>(undefined);
+  const [cachedFaviconUrl, setCachedFaviconUrl] = createSignal<string | undefined>(undefined);
 
-  onMount(async () => {
-    if (bookmark().iconDataUrl) {
-      setFaviconUrl(bookmark().iconDataUrl);
-    } else {
-      const favicon = await getFaviconURL(bookmark().url);
-      setFaviconUrl(favicon);
+  createEffect(async () => {
+    const currentBookmark = bookmark();
+    if (currentBookmark.iconDataUrl) {
+      setCachedFaviconUrl(undefined);
+    } else if (!cachedFaviconUrl()) {
+      const favicon = await getFaviconURL(currentBookmark.url);
+      setCachedFaviconUrl(favicon);
     }
+  });
+
+  const faviconImgSrc = createMemo(() => {
+    return bookmark().iconDataUrl || cachedFaviconUrl();
   });
 
   const {
@@ -100,8 +105,8 @@ const Bookmark: Component<{
         onContextMenu={handleContextMenu}
       >
         <div class={styles.iconContainer}>
-          {faviconUrl() ? (
-            <img src={faviconUrl()} alt="" />
+          {faviconImgSrc() ? (
+            <img src={faviconImgSrc()} alt="" />
           ) : (
             <span>?</span>
           )}
