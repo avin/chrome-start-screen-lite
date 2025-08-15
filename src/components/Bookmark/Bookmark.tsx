@@ -1,5 +1,5 @@
 import cn from 'clsx';
-import { Component, createMemo } from 'solid-js';
+import { Component, createMemo, createSignal, onMount } from 'solid-js';
 import styles from './Bookmark.module.scss';
 import { useStore } from '../../store/store';
 import type { Bookmark as BookmarkType } from '../../types';
@@ -22,6 +22,17 @@ const Bookmark: Component<{
     ) as BookmarkType;
   });
 
+  const [faviconUrl, setFaviconUrl] = createSignal<string | undefined>(undefined);
+
+  onMount(async () => {
+    if (bookmark().iconDataUrl) {
+      setFaviconUrl(bookmark().iconDataUrl);
+    } else {
+      const favicon = await getFaviconURL(bookmark().url);
+      setFaviconUrl(favicon);
+    }
+  });
+
   const {
     isDragging,
     isVisuallyDragging,
@@ -32,8 +43,6 @@ const Bookmark: Component<{
     () => bookmark().position,
     (newPosition) => updateBookmarkPosition(bookmark().id, newPosition)
   );
-
-  const faviconImgSrc = createMemo(() => bookmark().iconDataUrl || getFaviconURL(bookmark().url));
 
   const bookmarkStyle = () => {
     const tileCoordinates = getBookmarkCoordinatesByPosition(
@@ -91,8 +100,8 @@ const Bookmark: Component<{
         onContextMenu={handleContextMenu}
       >
         <div class={styles.iconContainer}>
-          {faviconImgSrc() ? (
-            <img src={faviconImgSrc()} alt="" />
+          {faviconUrl() ? (
+            <img src={faviconUrl()} alt="" />
           ) : (
             <span>?</span>
           )}
