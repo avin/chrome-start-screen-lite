@@ -1,12 +1,12 @@
 import cn from 'clsx';
-import { Component, createMemo } from 'solid-js';
+import { Component, createMemo, createSignal, createEffect } from 'solid-js';
 import styles from './Bookmark.module.scss';
 import { useStore } from '../../store/store';
 import type { Bookmark as BookmarkType } from '../../types';
 import { getBookmarkCoordinatesByPosition, TILE_SIZE } from '../../utils/position';
 import { openContextMenu } from '../ContextMenu/ContextMenu';
 import { useDragging } from '../../hooks/useDragging';
-import { getFaviconURL } from '../../utils/favicon';
+import { getChromeFaviconUrl, getGoogleFaviconUrl, isChrome } from '../../utils/favicon';
 
 const Bookmark: Component<{
   bookmarkId: string;
@@ -22,6 +22,37 @@ const Bookmark: Component<{
     ) as BookmarkType;
   });
 
+  const [currentFaviconUrl, setCurrentFaviconUrl] = createSignal<string | undefined>(undefined);
+
+  createEffect(() => {
+    const currentBookmark = bookmark();
+    
+    if (currentBookmark.iconDataUrl) {
+      setCurrentFaviconUrl(currentBookmark.iconDataUrl);
+      return;
+    }
+
+    if (isChrome()) {
+      const chromeUrl = getChromeFaviconUrl(currentBookmark.url);
+      if (chromeUrl) {
+        setCurrentFaviconUrl(chromeUrl);
+      }
+    } else {
+      const googleUrl = getGoogleFaviconUrl(currentBookmark.url);
+      setCurrentFaviconUrl(googleUrl);
+    }
+  });
+
+  const handleGoogleFaviconLoad = (e: Event) => {
+    if (bookmark().iconDataUrl) return;
+    
+    const img = e.target as HTMLImageElement;
+    if (img.naturalWidth > 16 && img.naturalHeight > 16) {
+      const googleUrl = getGoogleFaviconUrl(bookmark().url);
+      setCurrentFaviconUrl(googleUrl);
+    }
+  };
+
   const {
     isDragging,
     isVisuallyDragging,
@@ -32,8 +63,6 @@ const Bookmark: Component<{
     () => bookmark().position,
     (newPosition) => updateBookmarkPosition(bookmark().id, newPosition)
   );
-
-  const faviconImgSrc = createMemo(() => bookmark().iconDataUrl || getFaviconURL(bookmark().url));
 
   const bookmarkStyle = () => {
     const tileCoordinates = getBookmarkCoordinatesByPosition(
@@ -91,8 +120,19 @@ const Bookmark: Component<{
         onContextMenu={handleContextMenu}
       >
         <div class={styles.iconContainer}>
-          {faviconImgSrc() ? (
-            <img src={faviconImgSrc()} alt="" />
+          {currentFaviconUrl() ? (
+            <>
+              <img src={currentFaviconUrl()} alt="" />
+              {isChrome() && !bookmark().iconDataUrl && (
+                <img 
+                  src={getGoogleFaviconUrl(bookmark().url)} 
+                  alt=""
+                  style={{ display: 'none' }}
+                  onLoad={handleGoogleFaviconLoad}
+                  onError={() => {}}
+                />
+              )}
+            </>
           ) : (
             <span>?</span>
           )}

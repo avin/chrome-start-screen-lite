@@ -1,4 +1,4 @@
-import { Component, For, createEffect, createSignal, onMount, onCleanup } from 'solid-js';
+import { Component, For, createEffect, createSignal, onMount, onCleanup, Show } from 'solid-js';
 import styles from './MainArea.module.scss';
 import { useStore } from '../../store/store';
 import { Position } from '../../types';
@@ -6,6 +6,7 @@ import { getBookmarkPositionByCoordinates } from '../../utils/position';
 import { calculateLayout } from '../../utils/layout';
 import Bookmark from '../Bookmark/Bookmark';
 import { openContextMenu } from '../ContextMenu/ContextMenu';
+import Settings from '../Settings/Settings';
 
 const RESIZE_DEBOUNCE_MS = 100;
 
@@ -17,6 +18,7 @@ const MainArea: Component = () => {
 
   const [centerOffset, setCenterOffset] = createSignal<Position>([0, 0]);
   const [scale, setScale] = createSignal(1);
+  const [showSettings, setShowSettings] = createSignal(false);
 
   const adjustLayout = () => {
     const positions = state.bookmarks.map(b => b.position);
@@ -49,17 +51,30 @@ const MainArea: Component = () => {
           setEditingBookmark('new');
         },
       },
+      {
+        title: chrome.i18n.getMessage("settings"),
+        onClick: () => setShowSettings(true),
+      },
     ]);
     e.preventDefault();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+      e.preventDefault();
+      setShowSettings(true);
+    }
   };
 
   onMount(() => {
     adjustLayout();
     window.addEventListener('resize', handleResize);
+    window.addEventListener('keydown', handleKeyDown);
   });
 
   onCleanup(() => {
     window.removeEventListener('resize', handleResize);
+    window.removeEventListener('keydown', handleKeyDown);
   });
 
   createEffect(() => {
@@ -68,23 +83,28 @@ const MainArea: Component = () => {
   });
 
   return (
-    <div
-      class={styles.container}
-      onContextMenu={handleContextMenu}
-    >
-      <div 
-        class={styles.center}
-        data-bookmark-container
-        style={{
-          transform: `translate(${centerOffset()[0]}px, ${centerOffset()[1]}px) scale(${scale()})`,
-          'transform-origin': 'center'
-        }}
+    <>
+      <div
+        class={styles.container}
+        onContextMenu={handleContextMenu}
       >
-        <For each={state.bookmarks}>
-          {(bookmark) => <Bookmark bookmarkId={bookmark.id} />}
-        </For>
+        <div 
+          class={styles.center}
+          data-bookmark-container
+          style={{
+            transform: `translate(${centerOffset()[0]}px, ${centerOffset()[1]}px) scale(${scale()})`,
+            'transform-origin': 'center'
+          }}
+        >
+          <For each={state.bookmarks}>
+            {(bookmark) => <Bookmark bookmarkId={bookmark.id} />}
+          </For>
+        </div>
       </div>
-    </div>
+      <Show when={showSettings()}>
+        <Settings onClose={() => setShowSettings(false)} />
+      </Show>
+    </>
   );
 };
 

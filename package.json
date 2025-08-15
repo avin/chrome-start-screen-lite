@@ -8,6 +8,8 @@
     "dev": "npm run generate-locales && vite",
     "dev:crx": "cross-env CRX=1 npm run dev",
     "build": "npm run generate-locales && vite build",
+    "build:chrome": "cross-env TARGET=chrome npm run build",
+    "build:firefox": "cross-env TARGET=firefox npm run build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest"

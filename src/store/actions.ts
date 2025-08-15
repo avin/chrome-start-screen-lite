@@ -47,11 +47,9 @@ export const initActions = ({
   };
 
   const removeBookmark = (bookmarkId: string) => {
-    // Remove associated icon from local storage
     if (chrome.storage && chrome.storage.local) {
       chrome.storage.local.remove(`icon:${bookmarkId}`, () => {
         if (chrome.runtime && chrome.runtime.lastError) {
-          // eslint-disable-next-line no-console
           console.warn('Failed to remove icon from local:', chrome.runtime.lastError.message);
         }
       });
@@ -67,8 +65,6 @@ export const initActions = ({
     bookmarkId: string,
     newBookmarkOptions: Partial<Bookmark>,
   ) => {
-    // Persist icon changes in local storage separately
-    // Detect explicit presence of the field, even if value is undefined
     const iconFieldPresent = Object.prototype.hasOwnProperty.call(
       newBookmarkOptions,
       'iconDataUrl',
@@ -78,14 +74,12 @@ export const initActions = ({
       if (newBookmarkOptions.iconDataUrl) {
         chrome.storage.local.set({ [key]: newBookmarkOptions.iconDataUrl }, () => {
           if (chrome.runtime && chrome.runtime.lastError) {
-            // eslint-disable-next-line no-console
             console.warn('Failed to save icon to local:', chrome.runtime.lastError.message);
           }
         });
       } else {
         chrome.storage.local.remove(key, () => {
           if (chrome.runtime && chrome.runtime.lastError) {
-            // eslint-disable-next-line no-console
             console.warn('Failed to remove icon from local:', chrome.runtime.lastError.message);
           }
         });
@@ -105,12 +99,10 @@ export const initActions = ({
   const createBookmark = (newBookmarkOptions: Omit<Bookmark, 'id'>) => {
     const id = nanoid();
 
-    // Save icon to local storage if provided
     if (newBookmarkOptions.iconDataUrl && chrome.storage && chrome.storage.local) {
       const key = `icon:${id}`;
       chrome.storage.local.set({ [key]: newBookmarkOptions.iconDataUrl }, () => {
         if (chrome.runtime && chrome.runtime.lastError) {
-          // eslint-disable-next-line no-console
           console.warn('Failed to save icon to local:', chrome.runtime.lastError.message);
         }
       });
@@ -134,6 +126,44 @@ export const initActions = ({
     );
   };
 
+  const importBookmarks = async (bookmarks: Bookmark[]) => {
+    if (chrome.storage && chrome.storage.local) {
+      const allIconKeys = state.bookmarks.map(b => `icon:${b.id}`);
+      await new Promise<void>((resolve) => {
+        chrome.storage.local.remove(allIconKeys, () => {
+          resolve();
+        });
+      });
+      
+      const iconData: Record<string, string> = {};
+      for (const bookmark of bookmarks) {
+        if (bookmark.iconDataUrl) {
+          iconData[`icon:${bookmark.id}`] = bookmark.iconDataUrl;
+        }
+      }
+      
+      if (Object.keys(iconData).length > 0) {
+        await new Promise<void>((resolve) => {
+          chrome.storage.local.set(iconData, () => {
+            if (chrome.runtime && chrome.runtime.lastError) {
+              console.warn('Failed to save icons to local:', chrome.runtime.lastError.message);
+            }
+            resolve();
+          });
+        });
+      }
+    }
+    
+    setState(
+      produce((store) => {
+        store.bookmarks = bookmarks.map(b => {
+          const { iconDataUrl, ...rest } = b;
+          return rest;
+        });
+      }),
+    );
+  };
+
   return {
     updateBookmarkPosition,
     setEditingBookmark,
@@ -141,5 +171,6 @@ export const initActions = ({
     createBookmark,
     updateBookmark,
     setNewBookmarkPosition,
+    importBookmarks,
   };
 };
