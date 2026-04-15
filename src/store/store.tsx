@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import {
   ParentComponent,
   createContext,
@@ -7,6 +6,7 @@ import {
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Bookmark, Position } from '../types';
+import { saveBookmarksToLocal } from '../utils/bookmarksStorage';
 import { initActions } from './actions';
 import { initSelectors } from './selectors';
 
@@ -42,20 +42,8 @@ export const StoreProvider: ParentComponent<{
   const actions = initActions({ state, setState, selectors });
 
   createEffect(() => {
-    if (state.bookmarks && chrome.storage && chrome.storage.sync) {
-      // Strip heavy fields (iconDataUrl) before syncing
-      const bookmarksToSync = state.bookmarks.map((b) => {
-        const { iconDataUrl, ...rest } = b as Bookmark & { iconDataUrl?: string };
-        return rest;
-      });
-
-      const payload = { bookmarks: JSON.stringify(bookmarksToSync) } as const;
-      chrome.storage.sync.set(payload, () => {
-        if (chrome.runtime && chrome.runtime.lastError) {
-          // eslint-disable-next-line no-console
-          console.warn('Failed to sync bookmarks:', chrome.runtime.lastError.message);
-        }
-      });
+    if (state.bookmarks) {
+      void saveBookmarksToLocal(state.bookmarks);
     }
   });
 
